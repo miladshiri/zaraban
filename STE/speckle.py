@@ -45,14 +45,12 @@ class Speckle:
         features[:, 2] = patches.max(axis=1)
         features[:, 3] = patches.min(axis=1)
         features[:, 4] = patches.sum(axis=1)
-        
-        plt.scatter(features[:, 0], features[:, 1])
-        
+                
         model = KMeans(n_clusters=2)
-        model.fit(features)
+        model.fit(features[:, :1])
         
         centers = model.cluster_centers_
-        if centers[0, 4] > centers[1, 4]:
+        if centers[0, 0] > centers[1, 0]:
             speckle_class = 0
         else:
             speckle_class = 1
@@ -60,7 +58,7 @@ class Speckle:
         self.__model = model
         self.__speckle_class = speckle_class
     
-    def predict(self, patches):
+    def predict(self, patches, visualize=False, image=None):
         patches = patches.reshape(patches.shape[0], -1)
         features = np.zeros((patches.shape[0], 5))
         
@@ -70,9 +68,29 @@ class Speckle:
         features[:, 3] = patches.min(axis=1)
         features[:, 4] = patches.sum(axis=1)
         model = self.__model
-        labels = model.predict(features)
+        labels = model.predict(features[:, :1])
         if self.__speckle_class == 0:
             labels = np.ones_like(labels) - labels
+        
+        if visualize == True:
+            speckles_x = X[labels==1]
+            speckles_y = Y[labels==1]     
+            hole_x = X[labels==0]
+            hole_y = Y[labels==0]
+            
+            im = image.copy()
+            for i in range(1, speckles_x.shape[0]):
+                imn = cv2.rectangle(im, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
+                , (speckles_x[i]+kernel_width, speckles_y[i]+kernel_width), (200, 200, 230), thickness=1)
+            
+            for i in range(1, hole_x.shape[0]):
+                imn = cv2.rectangle(im, (hole_x[i]-kernel_width, hole_y[i]-kernel_width)
+                , (hole_x[i]+kernel_width, hole_y[i]+kernel_width), (100, 100, 50), thickness=1)
+            
+            
+            plt.figure()
+            plt.imshow(im)
+        
         return labels
         
 #####Fit model
@@ -96,8 +114,8 @@ im_list = im1.reshape(1, f_size[0], f_size[1])
 im_list = np.concatenate((im_list, im2.reshape(1, f_size[0], f_size[1])), axis=0)
 
 
-samples_num = 50
-kernel_width = 7
+samples_num = 200
+kernel_width = 5
 #samples_num*im_list.shape[0]
 
 speckle_modlel = Speckle()
@@ -113,28 +131,10 @@ for num in range(1, samples_num):
     patches[num, :, :] = im1[Y[num]-kernel_width:Y[num]+kernel_width+1, X[num]-kernel_width:X[num]+kernel_width+1]
 
 
-labels = speckle_modlel.predict(patches)
+labels = speckle_modlel.predict(patches, visualize=True, image=im1)
 
 
-speckles_x = X[labels==1]
-speckles_y = Y[labels==1]
 
-hole_x = X[labels==0]
-hole_y = Y[labels==0]
-
-
-imn = im1.copy()
-for i in range(1, speckles_x.shape[0]):
-    imn = cv2.rectangle(imn, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
-    , (speckles_x[i]+kernel_width, speckles_y[i]+kernel_width), (200, 200, 230), thickness=1)
-
-for i in range(1, hole_x.shape[0]):
-    imn = cv2.rectangle(imn, (hole_x[i]-kernel_width, hole_y[i]-kernel_width)
-    , (hole_x[i]+kernel_width, hole_y[i]+kernel_width), (100, 100, 50), thickness=1)
-
-
-plt.figure()
-plt.imshow(imn)
     
 
 
