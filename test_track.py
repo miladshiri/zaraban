@@ -13,18 +13,18 @@ from PIL import Image
 import cv2
 from matplotlib import pyplot as plt
 
-#path = "E:/MathLab/EWI_Project/Database/Behnam/4C/original/"
-path = "E:/MathLab/Python/Projects/Zaraban_project/source/track_object/test1/"
+path = "E:/MathLab/EWI_Project/Database/Behnam/4C/original/"
+#path = "E:/MathLab/Python/Projects/Zaraban_project/source/track_object/test1/"
 
-#im1 = Image.open(path + "im (4).bmp")
-#im2 = Image.open(path + "im (5).bmp")
+im1 = Image.open(path + "im (4).bmp")
+im2 = Image.open(path + "im (5).bmp")
 
-im1 = Image.open(path + "1.jpg")
-im2 = Image.open(path + "2.jpg")
+#im1 = Image.open(path + "1.jpg")
+#im2 = Image.open(path + "2.jpg")
 
 
-im1 = im1.resize((100, 100))
-im2 = im2.resize((100, 100))
+#im1 = im1.resize((100, 100))
+#im2 = im2.resize((100, 100))
 
 im1 = np.array(im1)
 im2 = np.array(im2)
@@ -32,14 +32,14 @@ im2 = np.array(im2)
 plt.imshow(im1)
     
 
-WS = 5 #window_size
-SS = 30 #search_size
+WS = 12 #window_size
+SS = 14 #search_size
 
 
-markers = np.array([[39, 39],])
+markers = np.array([[210, 155],])
 new_markers = track.track_point(im1=im1, im2=im2, markers=markers, WS=WS, SS=SS)
 
-plt.imshow(im1)
+plt.imshow(im1, cmap='gray')
 plt.plot([markers[0, 0], new_markers[0, 0]], [markers[0, 1], new_markers[0, 1]])
 plt.show()
 #(vectx, vecty) = track.track_single_eulerian(im1=im1, im2=im2, WS=WS, SS=SS)
