@@ -96,25 +96,26 @@ def track_point(im1, im2, markers, WS, SS):
     if type(im2) != np.ndarray:
            print ('Error: Input image2 should be numpy.ndarray')
            return 0
-       
+    X, Y = markers   
     f_size = im1.shape
     f_rows = f_size[0]
     f_cols = f_size[1]
-    counts = markers.shape[0]
+#    counts = markers.shape[0]
+    counts = X.shape[0]
     PD = WS + SS #Padding
     
     TH = 0  #Speckle Threshold
     
-    vectx = np.zeros(f_size)
     vecty = np.zeros(f_size)
     progress = 0
-    displacements = markers.copy()
+    x_displacements = X.copy()
+    y_displacements = Y.copy()
+    
     for i in range(0, counts):
-        marker = markers[i]
         progress += 1
         print('{:.3}'.format(progress/(counts)*100))
-        col = marker[0]
-        row = marker[1]
+        col = X[i]
+        row = Y[i]
         window = im1[row-WS:row+WS,col-WS:col+WS] 
         if np.mean(window) > TH:
             match_score = np.zeros((2*SS+1, 2*SS+1))
@@ -131,14 +132,14 @@ def track_point(im1, im2, markers, WS, SS):
             print(match_score.std())
             print(match_score.mean())
             if match_score[SS, SS] == 1 or match_score[SS, SS] != match_score[SS, SS]:
-               displacements[i, 0] = 0;
-               displacements[i, 1] = 0;
+               y_displacements[i] = 0;
+               x_displacements[i] = 0;
             else:
                 a, b = np.where(match_score == np.max(match_score))
-                displacements[i, 0] = a[0] - (SS)
-                displacements[i, 1] = b[0] - (SS)
+                y_displacements[i] = a[0] - (SS)
+                x_displacements[i] = b[0] - (SS)
      
-    return displacements + markers
+    return (x_displacements + X, y_displacements + Y)
     
                
         
