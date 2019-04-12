@@ -102,7 +102,7 @@ class Speckle:
         
         if self.method == 'unsupervised':
             model = KMeans(n_clusters=2)
-            model.fit(features[:, :1])
+            model.fit(features)
             
             centers = model.cluster_centers_
             if centers[0, 0] > centers[1, 0]:
@@ -144,11 +144,11 @@ class Speckle:
         
         im = image.copy()
         for i in range(0, speckles_x.shape[0]):
-            imn = cv2.rectangle(im, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
+            cv2.rectangle(im, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
             , (speckles_x[i]+kernel_width, speckles_y[i]+kernel_width), (200, 200, 230), thickness=1)
         
         for i in range(0, hole_x.shape[0]):
-            imn = cv2.rectangle(im, (hole_x[i]-kernel_width, hole_y[i]-kernel_width)
+            cv2.rectangle(im, (hole_x[i]-kernel_width, hole_y[i]-kernel_width)
             , (hole_x[i]+kernel_width, hole_y[i]+kernel_width), (100, 100, 50), thickness=1)
         
         
