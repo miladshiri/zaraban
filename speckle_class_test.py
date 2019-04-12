@@ -1,12 +1,15 @@
 import numpy as np
 from PIL import Image
 import cv2
+from os import listdir
+from os.path import isfile, join
 from matplotlib import pyplot as plt
 from sklearn.feature_extraction import image
 from sklearn.cluster import KMeans
 from sklearn import svm 
 from sklearn.neighbors import KNeighborsClassifier
 
+import tools
 from STE import track
 from STE.speckle import Speckle
 from STE.speckle import pick_point, patch_extraction, feature_extraction, random_patches, train_test_feature_select
@@ -32,17 +35,8 @@ im_list = im1.reshape(1, f_size[0], f_size[1])
 im_list = np.concatenate((im_list, im2.reshape(1, f_size[0], f_size[1])), axis=0)
 
 
-frames = np.array([])
-
-start=14
-end=20
-for i in range(start, end+1):
-    frame = Image.open(path + "im ({}).bmp".format(i+1))
-    frame = np.array(frame.resize((300, 300)))
-    frame = frame.reshape(1, frame.shape[0], frame.shape[1])
-    frames = np.concatenate((frames, frame), axis=0) if frames.size else frame
-
-
+frames = tools.read_frames(path)
+frames = frames[13:16]
 samples_num = 200
 kernel_width = 5
 SS = 6 #search_size
@@ -66,7 +60,7 @@ speckle_model.fit(features[:, :3])
 
 #### Use Model
 
-X, Y = pick_point(frames[0], points_size=10)
+X, Y = pick_point(frames[0], points_size=3)
 patches = patch_extraction(frames[0], (X, Y), kernel_width)
 features = feature_extraction(patches)
 labels = speckle_model.predict(features[:, :3])
@@ -79,25 +73,37 @@ speckle_Y = Y[labels==1]
 ### Track
 
 #markers = np.hstack((speckle_X.reshape(-1, 1), speckle_Y.reshape(-1, 1)))
-(oldX, oldY) = (speckle_X, speckle_Y)
-all_old_x = np.array([])
-all_old_y = np.array([])
-all_new_x = np.array([])
-all_new_y = np.array([])
-for i in range(0, len(frames)-1):
-    all_old_x = np.hstack((all_old_x, oldX)) if all_old_x.size else oldX
-    all_old_y = np.hstack((all_old_y, oldY)) if all_old_y.size else oldY
-    newX, newY = track.track_point(im1=frames[i], im2=frames[i+1], markers=(oldX, oldY), WS=kernel_width, SS=SS)
-    (oldX, oldY) = (newX, newY)
-    all_new_x = np.hstack((all_new_x, newX)) if all_new_x.size else newX
-    all_new_y = np.hstack((all_new_y, newY)) if all_new_y.size else newY
-    
 
-print (all_new_x==all_old_x)
-print (all_new_y==all_old_y)
-#plt.imshow(frames[0], cmap='gray')
-plt.plot([all_old_x, all_new_x], [all_old_y, all_new_y])
-plt.show()
+
+(oldX, oldY) = (speckle_X, speckle_Y)
+
+#def track_sequence(frames, markers):
+#    (oldX, oldY) = markers
+#all_old_x = np.array([])
+#all_old_y = np.array([])
+#all_new_x = np.array([])
+#all_new_y = np.array([])
+
+rows = frames.shape[0]
+cols = speckle_X.shape[0]
+
+all_new_x = np.zeros((rows, cols))
+all_new_y = np.zeros((rows, cols))
+
+all_new_x[0] = oldX.reshape((1, -1))
+all_new_y[0] = oldY.reshape((1, -1))
+
+for i in range(0, rows-1):
+    newX, newY = track.track_point(frames[i], frames[i+1],
+                 markers=(oldX, oldY), WS=kernel_width, SS=SS)
+    (oldX, oldY) = (newX, newY)
+    all_new_x[i+1] = newX.reshape((1, -1))
+    all_new_y[i+1] = newY.reshape((1, -1))
+
+
+##plt.imshow(frames[0], cmap='gray')
+#plt.plot([all_old_x, all_new_x], [all_old_y, all_new_y])
+#plt.show()
 
 
 #
