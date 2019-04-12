@@ -79,7 +79,7 @@ def track_single_eulerian(im1, im2, WS, SS):
     
 
         
-def track_point(im1, im2, markers, WS, SS):
+def track_point(frame1, frame2, markers, WS, SS):
     ######
     ### track_point > applying block matching to track a point between 
     ###               two frames.
@@ -90,14 +90,14 @@ def track_point(im1, im2, markers, WS, SS):
     ### SS= Search Size
     #######
     
-    if type(im1) != np.ndarray:
+    if type(frame1) != np.ndarray:
            print ('Error: Input image1 should be numpy.ndarray')
            return 0
-    if type(im2) != np.ndarray:
+    if type(frame2) != np.ndarray:
            print ('Error: Input image2 should be numpy.ndarray')
            return 0
     X, Y = markers   
-    f_size = im1.shape
+    f_size = frame1.shape
     f_rows = f_size[0]
     f_cols = f_size[1]
 #    counts = markers.shape[0]
@@ -116,14 +116,14 @@ def track_point(im1, im2, markers, WS, SS):
         print('{:.3}'.format(progress/(counts)*100))
         col = X[i]
         row = Y[i]
-        window = im1[row-WS:row+WS,col-WS:col+WS] 
+        window = frame1[row-WS:row+WS,col-WS:col+WS] 
         if np.mean(window) > TH:
             match_score = np.zeros((2*SS+1, 2*SS+1))
             cross_col = np.zeros((2*SS+1, 2*SS+1))
 
             for ii in range(-SS, SS+1):
                 for jj in range(-SS, SS+1):
-                    patch = im2[row+ii-WS:row+ii+WS, col+jj-WS:col+jj+WS]
+                    patch = frame2[row+ii-WS:row+ii+WS, col+jj-WS:col+jj+WS]
 #                    match_score[ii+SS, jj+SS] = np.sum(np.power(window-patch, 2))            
                     cross_col[ii+SS, jj+SS] = abs(np.mean((window-window.mean())*(patch-patch.mean()) / (window.std()*patch.std())))
                     match_score = cross_col
