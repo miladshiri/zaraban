@@ -50,18 +50,22 @@ def feature_extraction(patches):
     features[:, 1] = patches.std(axis=1)
     features[:, 2] = patches.max(axis=1)
     features[:, 3] = patches.min(axis=1)
-    features[:, 4] = patches.sum(axis=1)
+#    features[:, 4] = patches.sum(axis=1)
     return features
 
 
 def random_patches(frames, kernel_radius, samples_num=10):
-    patches = np.empty((0, kernel_radius*2+1, kernel_radius*2+1))
+    patches = np.zeros((samples_num, kernel_radius*2+1, kernel_radius*2+1, frames.shape[0]))
+    points = np.zeros((samples_num, 2, frames.shape[0]))
     f_size = frames.shape[1:]
-    for im in frames:
+    for i, im in enumerate(frames):
         X = np.random.randint(1+kernel_radius, f_size[1]-kernel_radius, samples_num)
         Y = np.random.randint(1+kernel_radius, f_size[0]-kernel_radius, samples_num)
-        patches = np.concatenate((patches, patch_extraction(im, (X, Y), kernel_radius)), axis=0)
-    return patches
+        points[:, 0, i] = X
+        points[:, 1, i] = Y
+        
+        patches[:, :, :, i] = patch_extraction(im, (X, Y), kernel_radius)
+    return patches, points
 
 
 def train_test_feature_select(frames, points_size, kernel_radius):
