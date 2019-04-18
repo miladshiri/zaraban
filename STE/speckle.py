@@ -137,26 +137,46 @@ class Speckle:
         return labels
      
     
-    def visualize(self, points, labels, image=None, kernel_width=5):
-        
-        X = points[0]
-        Y = points[1]
-        speckles_x = X[labels==1]
-        speckles_y = Y[labels==1]     
-        hole_x = X[labels==0]
-        hole_y = Y[labels==0]
-        
-        im = image.copy()
-        for i in range(0, speckles_x.shape[0]):
-            cv2.rectangle(im, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
-            , (speckles_x[i]+kernel_width, speckles_y[i]+kernel_width), (200, 200, 230), thickness=1)
-        
-        for i in range(0, hole_x.shape[0]):
-            cv2.rectangle(im, (hole_x[i]-kernel_width, hole_y[i]-kernel_width)
-            , (hole_x[i]+kernel_width, hole_y[i]+kernel_width), (100, 100, 50), thickness=1)
-        
-        
-        plt.figure()
-        plt.imshow(im)
-        return 1
+def visualize(self, points, labels, image=None, kernel_width=5):
+    
+    X = points[0]
+    Y = points[1]
+    speckles_x = X[labels==1]
+    speckles_y = Y[labels==1]     
+    hole_x = X[labels==0]
+    hole_y = Y[labels==0]
+    
+    im = image.copy()
+    for i in range(0, speckles_x.shape[0]):
+        cv2.rectangle(im, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
+        , (speckles_x[i]+kernel_width, speckles_y[i]+kernel_width), (200, 200, 230), thickness=1)
+    
+    for i in range(0, hole_x.shape[0]):
+        cv2.rectangle(im, (hole_x[i]-kernel_width, hole_y[i]-kernel_width)
+        , (hole_x[i]+kernel_width, hole_y[i]+kernel_width), (100, 100, 50), thickness=1)
+    
+    
+    plt.figure()
+    plt.imshow(im)
+    return 1
 
+
+def random_point_patch_feature(frames, kernel_width, samples_num=100):
+    patches, points = random_patches(frames, kernel_width, samples_num=100)
+    features = np.array([])
+    for i in range(patches.shape[3]):
+        ff = feature_extraction(patches[:, :, :, i])
+        ff = ff.reshape(ff.shape[0], ff.shape[1], 1)
+        features = np.concatenate((features, ff), axis=2) if features.size else ff
+    
+    return points, patches, features
+
+
+
+def flat(features):
+    new = np.array([])
+    if features.ndim == 3:
+        for i in range(features.shape[2]):
+            new = np.concatenate((new, features[:, :, i])) if new.size else features[:, :, i]
+        return new
+    return features
