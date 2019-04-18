@@ -45,16 +45,23 @@ def read_frames(path, size=(200, 200), pattern=None):
 
 
 
-def save_as_video(path, frames):
+def save_as_video(path, frames, overlay=False, source=None):
     if frames.ndim == 4:
         frames = np.flip(frames, axis=3)
     width = frames.shape[2]
     height = frames.shape[1]
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(path, fourcc, 2, (width, height))
-    for frame in frames:
+    for i, frame in enumerate(frames):
+        s = source[i]
         if frame.ndim < 3:
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+        
+        if s.ndim < 3:
+            s = cv2.cvtColor(s, cv2.COLOR_GRAY2BGR)
+        
+        if overlay:
+            frame = cv2.addWeighted(frame, .5, s, .5, 0)
         out.write(frame)
 
     out.release()
