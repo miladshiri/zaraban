@@ -79,8 +79,8 @@ def track_fixed_points(frame1, frame2, WS, SS, model, show_message=False):
                 vecty[row, col] = 0; 
             else:
                 a, b = np.where(match_score == np.max(match_score))
-                vectx[row, col] = a[0] - (SS)
-                vecty[row, col] = b[0] - (SS)
+                vectx[row, col] = b[0] - (SS)
+                vecty[row, col] = a[0] - (SS)
          
     return vectx, vecty
     
