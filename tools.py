@@ -12,21 +12,37 @@ from os import listdir
 from os.path import isfile, join
 import cv2
 
-def read_frames(path, size=(200, 200)):
+def read_frames(path, size=(200, 200), pattern=None):
     frames = np.array([])
-    for file in listdir(path):
-        file_format = file.split('.')[-1]
-        
-        if not isfile(join(path, file)):
-            continue
-        if file_format not in ['bmp', 'jpg']:
-            continue
-    
-        frame = Image.open(join(path, file))
-        frame = np.array(frame.resize(size))
-        frame = frame.reshape(1, frame.shape[0], frame.shape[1])
-        frames = np.concatenate((frames, frame), axis=0) if frames.size else frame
+    if not pattern:
+        for file in listdir(path):
+            file_format = file.split('.')[-1]
+            
+            if not isfile(join(path, file)):
+                continue
+            if file_format not in ['bmp', 'jpg']:
+                continue
+            print(file)
+            frame = Image.open(join(path, file))
+            frame = np.array(frame.resize(size))
+            frame = frame.reshape(1, frame.shape[0], frame.shape[1])
+            frames = np.concatenate((frames, frame), axis=0) if frames.size else frame
+    else:
+        i = 0
+        while(True):
+            i += 1
+            p = join(path, pattern.format(i))
+            if isfile(p):
+                print (p)
+                frame = Image.open(p)
+                frame = np.array(frame.resize(size))
+                frame = frame.reshape(1, frame.shape[0], frame.shape[1])
+                frames = np.concatenate((frames, frame), axis=0) if frames.size else frame
+            else:
+                break
+            
     return frames
+
 
 
 def save_as_video(path, frames):
