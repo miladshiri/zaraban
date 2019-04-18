@@ -46,7 +46,6 @@ newX, newY = track.track_point(im1=im1, im2=im2, markers=(X, Y), WS=WS, SS=SS)
 plt.imshow(im1, cmap='gray')
 plt.plot([X, newX], [Y, newY])
 plt.show()
-#(vectx, vecty) = track.track_single_eulerian(im1=im1, im2=im2, WS=WS, SS=SS)
 #
 #
 #imx = np.floor((vectx + SS)*255/8)
