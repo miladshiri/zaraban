@@ -8,8 +8,8 @@ import cv2
 
 path = "E:/MathLab/EWI_Project/Database/Behnam/4C/original/"
 ff = cv2.imread(path+'im (1).bmp')
-frames = tools.read_frames(path, size=(200, 200))
-frames = frames[15:24]
+frames = tools.read_frames(path, size=(200, 200), pattern="im ({}).bmp")
+frames = frames[:25]
 
 kernel_width = 5
 search_radius = 4
@@ -21,10 +21,11 @@ points, patches, features = speckle.random_point_patch_feature(frames, kernel_wi
 speckle_model = speckle.Speckle()
 speckle_model.fit(speckle.flat(features))
 
-patches, points = speckle.random_patches(frames, kernel_width, samples_num=100)
-features = speckle.feature_extraction(patches)
-labels = speckle_model.predict(features)
-speckle_model.visualize(points, labels, frames[])
+#points, patches, features = speckle.random_point_patch_feature(frames, kernel_width, samples_num=100)
+#i = 6
+#labels = speckle_model.predict(features[:, :, i])
+#speckle.visualize(points=points[:, :, i], labels=labels, image=frames[i])
+
 ##Supervised
 #features, labels = speckle.train_test_feature_select(im_list, 30, kernel_width)
 #speckle_model = speckle.Speckle(method='supervised')
@@ -58,10 +59,10 @@ speckle_model.visualize(points, labels, frames[])
 v = vectx
 
 vrgb = tools.convert2map(v, search_radius)
-tools.save_as_video('maps2x.avi', vrgb)
+tools.save_as_video('25mf.avi', vrgb)
 #RGB = cv2.resize(RGB, (500, 500))
 #cv2.imshow('sd', vbgr[2, :, :, :])
-plt.imshow(vrgb[1,:,:,:])
+#plt.imshow(vrgb[1,:,:,:])
 #plt.imshow(mat)
 #plt.imshow(vectx[2])
 
