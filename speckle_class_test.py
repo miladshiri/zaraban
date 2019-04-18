@@ -10,7 +10,7 @@ from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 
 import tools
-from STE import track
+from STE.track import track_sequence
 from STE.speckle import Speckle
 from STE.speckle import pick_point, patch_extraction, feature_extraction, random_patches, train_test_feature_select
 #####Fit model
@@ -36,7 +36,7 @@ im_list = np.concatenate((im_list, im2.reshape(1, f_size[0], f_size[1])), axis=0
 
 
 frames = tools.read_frames(path)
-frames = frames[13:16]
+frames = frames[13:40]
 samples_num = 200
 kernel_width = 5
 SS = 6 #search_size
@@ -69,43 +69,11 @@ speckle_model.visualize((X, Y), labels, image=frames[0], kernel_width=kernel_wid
 speckle_X = X[labels==1]
 speckle_Y = Y[labels==1]
 
+all_new_x, all_new_y = track_sequence(frames, (speckle_X, speckle_Y), 
+                                      kernel_width, SS)
 
-### Track
-
-#markers = np.hstack((speckle_X.reshape(-1, 1), speckle_Y.reshape(-1, 1)))
-
-
-(oldX, oldY) = (speckle_X, speckle_Y)
-
-#def track_sequence(frames, markers):
-#    (oldX, oldY) = markers
-#all_old_x = np.array([])
-#all_old_y = np.array([])
-#all_new_x = np.array([])
-#all_new_y = np.array([])
-
-rows = frames.shape[0]
-cols = speckle_X.shape[0]
-
-all_new_x = np.zeros((rows, cols))
-all_new_y = np.zeros((rows, cols))
-
-all_new_x[0] = oldX.reshape((1, -1))
-all_new_y[0] = oldY.reshape((1, -1))
-
-for i in range(0, rows-1):
-    newX, newY = track.track_point(frames[i], frames[i+1],
-                 markers=(oldX, oldY), WS=kernel_width, SS=SS)
-    (oldX, oldY) = (newX, newY)
-    all_new_x[i+1] = newX.reshape((1, -1))
-    all_new_y[i+1] = newY.reshape((1, -1))
-
-
-##plt.imshow(frames[0], cmap='gray')
-#plt.plot([all_old_x, all_new_x], [all_old_y, all_new_y])
-#plt.show()
-
-
+plt.plot(all_new_x, all_new_y)
+plt.show()
 #
 #############################################
 #
@@ -121,4 +89,5 @@ for i in range(0, rows-1):
 #speckle_model.visualize((X, Y), ll, image=im1, kernel_width=kernel_width)
 
 
+#(vectx, vecty) = track.track_fixed_points(im1=im1, im2=im2, WS=WS, SS=SS)
 
