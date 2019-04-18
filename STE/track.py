@@ -11,33 +11,31 @@ import numpy as np
 from PIL import Image
 import cv2
 from matplotlib import pyplot as plt
+from STE import speckle
 
 
-
-def track_single_eulerian(im1, im2, WS, SS):
+def track_fixed_points(frame1, frame2, WS, SS, model, show_message=False):
     ######
-    ### track_single > applying block matching between two frames
-    ###                to estimate speckles' displacement
+    ### track_fixed_points > Estimating the movement between two frames  
+    ###                      for all fixed points 
     ### im1 = firt frame
     ### im2 = second frame
     ### WS = Window Size
     ### SS= Search Size
     #######
     
-    if type(im1) != np.ndarray:
+    if type(frame1) != np.ndarray:
            print ('Error: Input image1 should be numpy.ndarray')
            return 0
-    if type(im2) != np.ndarray:
+    if type(frame2) != np.ndarray:
            print ('Error: Input image2 should be numpy.ndarray')
            return 0
        
-    f_size = im1.shape
+    f_size = frame1.shape
     f_rows = f_size[0]
     f_cols = f_size[1]
 
     PD = WS + SS #Padding
-    
-    TH = 0  #Speckle Threshold
     
     vectx = np.zeros(f_size)
     vecty = np.zeros(f_size)
