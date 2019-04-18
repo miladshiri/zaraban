@@ -56,10 +56,11 @@ def feature_extraction(patches):
 
 def random_patches(frames, kernel_radius, samples_num=10):
     patches = np.zeros((samples_num, kernel_radius*2+1, kernel_radius*2+1, frames.shape[0]))
-    points = np.zeros((samples_num, 2, frames.shape[0]))
+    points = np.zeros((samples_num, 2, frames.shape[0]), dtype=np.uint8)
     f_size = frames.shape[1:]
     for i, im in enumerate(frames):
-        X = np.random.randint(1+kernel_radius, f_size[1]-kernel_radius, samples_num)
+        np.random.seed()
+        X = np.random.randint(1+kernel_radius, f_size[1]-kernel_radius, samples_num, )
         Y = np.random.randint(1+kernel_radius, f_size[0]-kernel_radius, samples_num)
         points[:, 0, i] = X
         points[:, 1, i] = Y
@@ -137,10 +138,9 @@ class Speckle:
         return labels
      
     
-def visualize(self, points, labels, image=None, kernel_width=5):
-    
-    X = points[0]
-    Y = points[1]
+def visualize(points, labels, image=None, kernel_width=5):
+    X = points[:, 0]
+    Y = points[:, 1]
     speckles_x = X[labels==1]
     speckles_y = Y[labels==1]     
     hole_x = X[labels==0]
