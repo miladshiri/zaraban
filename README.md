@@ -1,5 +1,15 @@
-# zaraban
-Zaraban is a biomedical tools to analyze echocardiograms. 
+# Zaraban
+Zaraban is a biomedical tools that provide high-level APIs for analyzing echocardiograms. 
 This python package consists of various methods including:
+- Seckle detection using machine learning
 - Speckle Tracking Echocardiography (STE)
-- Strain Rate imaging
+- Movement visualization and saving
+- ...
+
+## Installation
+
+After downloading the package, you should install all packages in requirements.txt by the command below:
+
+    pip install -r requirements.txt
+
+ 
