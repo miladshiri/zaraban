@@ -22,7 +22,6 @@ def read_frames(path, size=(200, 200), pattern=None):
                 continue
             if file_format not in ['bmp', 'jpg']:
                 continue
-            print(file)
             frame = Image.open(join(path, file))
             frame = np.array(frame.resize(size))
             frame = frame.reshape(1, frame.shape[0], frame.shape[1])
@@ -33,7 +32,6 @@ def read_frames(path, size=(200, 200), pattern=None):
             i += 1
             p = join(path, pattern.format(i))
             if isfile(p):
-                print (p)
                 frame = Image.open(p)
                 frame = np.array(frame.resize(size))
                 frame = frame.reshape(1, frame.shape[0], frame.shape[1])
