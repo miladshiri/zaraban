@@ -86,7 +86,7 @@ def track_fixed_points(frame1, frame2, WS, SS, model, show_message=False):
     
 
         
-def track_specified_points(frame1, frame2, markers, WS, SS):
+def track_specified_points(frame1, frame2, markers, WS, SS, model, show_message=False):
     ######
     ### track_point > applying block matching to track a point between 
     ###               two frames.
@@ -115,41 +115,49 @@ def track_specified_points(frame1, frame2, markers, WS, SS):
     
     vecty = np.zeros(f_size)
     progress = 0
-    x_displacements = X.copy()
-    y_displacements = Y.copy()
+    x_displacements = np.zeros_like(X)
+    y_displacements = np.zeros_like(Y)
     
     for i in range(0, counts):
         progress += 1
-        print('{:.3}'.format(progress/(counts)*100))
+        if show_message:
+            print('{:.3}'.format(progress/(counts)*100))
         col = X[i]
         row = Y[i]
-        window = frame1[row-WS:row+WS,col-WS:col+WS] 
-        if np.mean(window) > TH:
-            match_score = np.zeros((2*SS+1, 2*SS+1))
-            cross_col = np.zeros((2*SS+1, 2*SS+1))
-
-            for ii in range(-SS, SS+1):
-                for jj in range(-SS, SS+1):
-                    patch = frame2[row+ii-WS:row+ii+WS, col+jj-WS:col+jj+WS]
+        if col==0 and row==0:
+            continue
+        
+        window = frame1[row-WS:row+WS,col-WS:col+WS]
+        feature = speckle.feature_extraction(window.reshape((1, window.shape[0], window.shape[1])))
+        label = model.predict(feature)
+        
+        if label[0] != 1: # If it is not speckle, go to next point.
+            continue
+        
+        match_score = np.zeros((2*SS+1, 2*SS+1))
+        cross_col = np.zeros((2*SS+1, 2*SS+1))
+        
+        for ii in range(-SS, SS+1):
+            for jj in range(-SS, SS+1):
+                patch = frame2[row+ii-WS:row+ii+WS, col+jj-WS:col+jj+WS]
 #                    match_score[ii+SS, jj+SS] = np.sum(np.power(window-patch, 2))            
+                if window.std()*patch.std():
                     cross_col[ii+SS, jj+SS] = abs(np.mean((window-window.mean())*(patch-patch.mean()) / (window.std()*patch.std())))
-                    match_score = cross_col
-#                    print (cross_col[ii+SS, jj+SS])
-            match_score = np.nan_to_num(match_score)
-            print(match_score.std())
-            print(match_score.mean())
-            if match_score[SS, SS] == 1 or match_score[SS, SS] != match_score[SS, SS]:
-               y_displacements[i] = 0;
-               x_displacements[i] = 0;
-            else:
-                a, b = np.where(match_score == np.max(match_score))
-                y_displacements[i] = a[0] - (SS)
-                x_displacements[i] = b[0] - (SS)
-     
+        match_score = cross_col
+        match_score = np.nan_to_num(match_score)
+
+        if match_score[SS, SS] == 1 or match_score[SS, SS] != match_score[SS, SS]:
+           y_displacements[i] = 0;
+           x_displacements[i] = 0;
+        else:
+            a, b = np.where(match_score == np.max(match_score))
+            y_displacements[i] = a[0] - (SS)
+            x_displacements[i] = b[0] - (SS)
+ 
     return (x_displacements + X, y_displacements + Y)
     
 
-def track_points_sequential(frames, markers, kernel_radius, search_radius):
+def track_points_sequential(frames, markers, WS, SS, model, show_message=True):
     (oldX, oldY) = markers    
     rows = frames.shape[0]
     cols = oldX.shape[0]
@@ -160,10 +168,12 @@ def track_points_sequential(frames, markers, kernel_radius, search_radius):
     
     for i in range(0, rows-1):
         newX, newY = track_specified_points(frames[i], frames[i+1],
-                     markers=(oldX, oldY), WS=kernel_radius, SS=search_radius)
+                     markers=(oldX, oldY), WS=WS, SS=SS, model=model, show_message=False)
         (oldX, oldY) = (newX, newY)
         all_new_x[i+1] = newX.reshape((1, -1))
         all_new_y[i+1] = newY.reshape((1, -1))
+        if show_message:
+            print('{:.3}'.format((i+1)/(frames.shape[0]-1)*100))
     return all_new_x, all_new_y
         
         
