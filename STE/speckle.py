@@ -69,7 +69,7 @@ def random_patches(frames, kernel_radius, samples_num=10):
     return patches, points
 
 
-def train_test_feature_select(frames, points_size, kernel_radius):
+def train_test_feature_select(frames, kernel_radius, points_size):
     features1 = np.array([])
     features2 = np.array([])
     patches1 = np.zeros((points_size, kernel_radius*2+1, kernel_radius*2+1, frames.shape[0]))
