@@ -86,7 +86,7 @@ def track_fixed_points(frame1, frame2, WS, SS, model, show_message=False):
     
 
         
-def track_specified_points(frame1, frame2, markers, WS, SS, model, show_message=False):
+def track_specified_points(frame1, frame2, markers, WS, SS, model=None, show_message=False):
     ######
     ### track_point > applying block matching to track a point between 
     ###               two frames.
@@ -128,11 +128,12 @@ def track_specified_points(frame1, frame2, markers, WS, SS, model, show_message=
             continue
         
         window = frame1[row-WS:row+WS,col-WS:col+WS]
-        feature = speckle.feature_extraction(window.reshape((1, window.shape[0], window.shape[1])))
-        label = model.predict(feature)
-        
-        if label[0] != 1: # If it is not speckle, go to next point.
-            continue
+        if model:
+            feature = speckle.feature_extraction(window.reshape((1, window.shape[0], window.shape[1])))
+            label = model.predict(feature)
+            
+            if label[0] != 1: # If it is not speckle, go to next point.
+                continue
         
         match_score = np.zeros((2*SS+1, 2*SS+1))
         cross_col = np.zeros((2*SS+1, 2*SS+1))
@@ -157,7 +158,7 @@ def track_specified_points(frame1, frame2, markers, WS, SS, model, show_message=
     return (x_displacements + X, y_displacements + Y)
     
 
-def track_points_sequential(frames, markers, WS, SS, model, show_message=True):
+def track_points_sequential(frames, markers, WS, SS, model=None, show_message=True):
     (oldX, oldY) = markers    
     rows = frames.shape[0]
     cols = oldX.shape[0]
