@@ -56,20 +56,23 @@ Supervised:
 There are two types of tracking method: Eulerian vs Lagrangian.   
 1) If you want to track some specific speckles (Lagrangian), use the code below:
     
+    '''
     markers = speckle.pick_point(frame, amount)
     (vectx, vecty) = track.track_points_sequential(frames, markers, WS=kernel_radius, SS=search_radius, model=speckle_model, show_message=True)
     
     plt.imshow(frames[0])
     plt.plot(vectx, vecty)
+    '''
     
 *amount: number of points per each frame  
 
 2) If you want to detect speckles' motion between two consequent frames (Eulerian), use the following:
 
+    '''
     (vectx, vecty) = track.track_fixed_sequence(frames, WS=kernel_radius, SS=search_radius, model=speckle_model, show_message=True) 
     vrgb = tools.convert2map(vectx, search_radius)
     tools.save_as_video('output.avi', vrgb, overlay=True, source=frames)
-
+    '''
 
 
 
