@@ -72,26 +72,45 @@ def random_patches(frames, kernel_radius, samples_num=10):
 def train_test_feature_select(frames, points_size, kernel_radius):
     features1 = np.array([])
     features2 = np.array([])
-
-    for frame in frames:
+    patches1 = np.zeros((points_size, kernel_radius*2+1, kernel_radius*2+1, frames.shape[0]))
+    points1 = np.zeros((points_size, 2, frames.shape[0]), dtype=np.uint8)
+    labels1 = np.zeros((points_size, frames.shape[0]))
+    
+    patches2 = np.zeros((points_size, kernel_radius*2+1, kernel_radius*2+1, frames.shape[0]))
+    points2 = np.zeros((points_size, 2, frames.shape[0]), dtype=np.uint8)
+    labels2 = np.zeros((points_size, frames.shape[0]))
+    for i, frame in enumerate(frames):
         title = 'Please select {} points with speckle pattern...'.format(points_size)
         X, Y = pick_point(frame, points_size=points_size, title=title)
-        patches = patch_extraction(frame, (X, Y), kernel_radius)
-        features1 = np.concatenate((features1, feature_extraction(patches)), axis=0) if features1.size else feature_extraction(patches)
-    labels1 = np.ones((features1.shape[0], 1))
+        points1[:, 0, i] = X
+        points1[:, 1, i] = Y
+        patches1[:, :, :, i] = patch_extraction(frame, (X, Y), kernel_radius)
+        ff = feature_extraction(patches1[:, :, :, i])
+        ff = ff.reshape(ff.shape[0], ff.shape[1], 1)
+        features1 = np.concatenate((features1, ff), axis=2) if features1.size else ff
+    
+    labels1 = np.ones((points_size, frames.shape[0]))
 
     for frame in frames:
         title = 'Please select {} points with non-speckle pattern...'.format(points_size)
         X, Y = pick_point(frame, points_size=points_size, title=title)
-        patches = patch_extraction(frame, (X, Y), kernel_radius)
-        features2 = np.concatenate((features2, feature_extraction(patches)), axis=0) if features2.size else feature_extraction(patches)
-    labels2 = np.zeros((features2.shape[0], 1))
+        points2[:, 0, i] = X
+        points2[:, 1, i] = Y
+        patches2[:, :, :, i] = patch_extraction(frame, (X, Y), kernel_radius)
+        ff = feature_extraction(patches2[:, :, :, i])
+        ff = ff.reshape(ff.shape[0], ff.shape[1], 1)
+        features2 = np.concatenate((features2, ff), axis=2) if features2.size else ff
+    
+    labels2 = np.zeros((points_size, frames.shape[0]))
 
-    labels = np.concatenate((labels1, labels2), axis=0)
-    features = np.concatenate((features1, features2), axis=0)
-    data = np.concatenate((features, labels), axis=1)
-    np.random.shuffle(data)
-    return data[:, :-1], data[:, -1]
+    labels = np.concatenate((labels1, labels2), axis=1)
+    features = np.concatenate((features1, features2), axis=2)
+    points = np.concatenate((points1, points2), axis=2)
+    patches = np.concatenate((patches1, patches2), axis=3)
+    
+#    data = np.concatenate((features, labels), axis=1)
+#    np.random.shuffle(data)
+    return points, patches, features, labels
 
 
 class Speckle:
@@ -106,6 +125,7 @@ class Speckle:
 #        f_size = im_list.shape[1:]
         
         if self.method == 'unsupervised':
+            np.random.shuffle(features)
             model = KMeans(n_clusters=2)
             model.fit(features)
             
@@ -116,6 +136,10 @@ class Speckle:
                 speckle_class = 1
                 
         elif self.method == 'supervised':
+            data = np.concatenate((features, labels), axis=1)
+            np.random.shuffle(data)
+            features = data[:, :-1]
+            labels = data[:, -1]
             model = KNeighborsClassifier(n_neighbors=3)
             model.fit(features, labels)
             speckle_class = 1
@@ -173,10 +197,17 @@ def random_point_patch_feature(frames, kernel_width, samples_num=100):
 
 
 
-def flat(features):
+def flat(mat):
     new = np.array([])
-    if features.ndim == 3:
-        for i in range(features.shape[2]):
-            new = np.concatenate((new, features[:, :, i])) if new.size else features[:, :, i]
+    if mat.ndim == 3:
+        for i in range(mat.shape[-1]):
+            new = np.concatenate((new, mat[:, :, i])) if new.size else mat[:, :, i]
         return new
-    return features
+    elif mat.ndim == 2:
+        for i in range(mat.shape[-1]):
+            new = np.concatenate((new, mat[:, i])) if new.size else mat[:, i]
+        return new.reshape(-1, 1)
+    return mat
+
+
+
