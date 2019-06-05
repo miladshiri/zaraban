@@ -11,7 +11,7 @@ import numpy as np
 from PIL import Image
 import cv2
 from matplotlib import pyplot as plt
-from STE import speckle
+from . import speckle
 
 
 def track_fixed_points(frame1, frame2, WS, SS, model, show_message=False):
