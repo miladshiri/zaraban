@@ -12,6 +12,17 @@ from os import listdir
 from os.path import isfile, join
 import cv2
 
+
+def im3d(im):
+    if im.ndim < 3:
+        new_im = np.zeros((im.shape[0], im.shape[1], 3), dtype=np.uint8)
+        new_im[:, :, 0] = im 
+        new_im[:, :, 1] = im
+        new_im[:, :, 2] = im
+        im = new_im
+    return im
+
+
 def read_frames(path, size=(200, 200), pattern=None):
     frames = np.array([])
     if not pattern:
