@@ -52,6 +52,23 @@ Supervised:
 
 *amount: number of points per each frame
 
+
+### Speckle detection using the trained model
+
+Since features are a three-dimensioanl array, you might want to use features related to a specific frame as shown below:
+    test_labels = speckle_model.predict(features[:, :, 0]) 
+
+Let’s separate speckle by a rectangle around it:
+    speckles_image = speckle.overlay_speckle_box(points[:, :, 0], test_labels, frames[0], kernel_width)
+
+and then save the output image:
+    import cv2
+    cv2.imwrite('speckles_image.png', speckles_image)
+
+The saved image would be like this:
+![speckles_image]('img/speckles_image.png')
+
+
 ### Tracking and Visualization
 There are two types of tracking method: Eulerian vs Lagrangian.   
 1) If you want to track some specific speckles (Lagrangian), use the code below:
