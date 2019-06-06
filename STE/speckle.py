@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 from sklearn.feature_extraction import image
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
-
+from .. import tools
 
 def pick_point(frame, points_size=100, title=None):      
     fig = plt.figure()
@@ -162,15 +162,15 @@ class Speckle:
         return labels
      
     
-def visualize(points, labels, image=None, kernel_width=5):
+def overlay_speckle_box(points, labels, im=None, kernel_width=5):
     X = points[:, 0]
     Y = points[:, 1]
     speckles_x = X[labels==1]
     speckles_y = Y[labels==1]     
     hole_x = X[labels==0]
     hole_y = Y[labels==0]
-    
-    im = image.copy()
+
+    im = tools.im3d(im)
     for i in range(0, speckles_x.shape[0]):
         cv2.rectangle(im, (speckles_x[i]-kernel_width, speckles_y[i]-kernel_width)
         , (speckles_x[i]+kernel_width, speckles_y[i]+kernel_width), (200, 200, 230), thickness=1)
@@ -180,9 +180,7 @@ def visualize(points, labels, image=None, kernel_width=5):
         , (hole_x[i]+kernel_width, hole_y[i]+kernel_width), (100, 100, 50), thickness=1)
     
     
-    plt.figure()
-    plt.imshow(im)
-    return 1
+    return im
 
 
 def random_point_patch_feature(frames, kernel_width, samples_num=100):
