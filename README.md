@@ -69,6 +69,8 @@ and then save the output image:
     cv2.imwrite('speckles_image.png', speckles_image)
 
 The saved image would be like this:
+
+
 ![speckles_image](img/speckles_image.png)
 
 
